@@ -44,52 +44,89 @@ function ListItem() {
     return (
         <>
             <Header />
-            <main className="container mx-auto p-4">
-                <div className="flex items-center justify-between mb-6">
+            <main className="flex-1 container mx-auto p-6 max-w-4xl">
+                <div className="mb-8">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="flex items-center gap-2 text-gray-600 hover:text-gray-800 font-semibold mb-6"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                        Back
+                    </button>
+
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-800">{title}</h1>
+                        <h1 className="text-4xl font-bold text-gray-800 mb-2">{title}</h1>
                         {passed?.id && <p className="text-sm text-gray-500">List ID: {passed.id}</p>}
-                    </div>
-                    <div>
-                        <button onClick={() => navigate(-1)} className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Back</button>
                     </div>
                 </div>
 
-                <section className="bg-white rounded-lg shadow overflow-hidden mb-6">
+                {/* Tasks Section */}
+                <div className="card p-8 mb-8">
                     {tasks.length === 0 ? (
-                        <div className="p-8 text-center text-gray-500">No tasks in this list.</div>
+                        <div className="text-center py-12">
+                            <svg className="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <p className="text-gray-500">No tasks in this list.</p>
+                        </div>
                     ) : (
-                        <ul className="divide-y">
+                        <div className="space-y-2">
                             {tasks.map(task => (
-                                <li key={task.id} className="p-4 flex items-center justify-between">
-                                    <div className="flex items-center gap-4">
-                                        <input type="checkbox" checked={task.status === 'completed'} onChange={() => toggleStatus(task.id)} className="w-4 h-4" />
-                                        <div>
-                                            <div className={`font-medium ${task.status === 'completed' ? 'line-through text-gray-400' : ''}`}>{task.text}</div>
-                                            {task.description && <div className="text-xs text-gray-500">{task.description}</div>}
+                                <div
+                                    key={task.id}
+                                    className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        checked={task.status === 'completed'}
+                                        onChange={() => toggleStatus(task.id)}
+                                        className="w-5 h-5 mt-1 cursor-pointer accent-orange-500"
+                                    />
+                                    <div className="flex-1">
+                                        <div className={`font-medium text-lg ${task.status === 'completed' ? 'line-through text-gray-400' : 'text-gray-800'}`}>
+                                            {task.text}
                                         </div>
+                                        {task.description && (
+                                            <div className="text-sm text-gray-500 mt-1">{task.description}</div>
+                                        )}
                                     </div>
-                                    <div className="flex items-center gap-3">
-                                        <button onClick={() => removeTask(task.id)} className="text-sm text-red-500 hover:underline">Remove</button>
-                                    </div>
-                                </li>
+                                    <button
+                                        onClick={() => removeTask(task.id)}
+                                        className="px-3 py-1 text-sm text-red-500 hover:bg-red-50 rounded opacity-0 group-hover:opacity-100 transition-all"
+                                    >
+                                        Remove
+                                    </button>
+                                </div>
                             ))}
-                        </ul>
+                        </div>
                     )}
-                </section>
+                </div>
 
+                {/* Removed Tasks Section */}
                 {removed.length > 0 && (
-                    <section className="bg-white rounded-lg shadow p-4">
-                        <h2 className="font-semibold mb-2">Removed tasks (restore)</h2>
-                        <ul className="divide-y">
+                    <div className="card p-8">
+                        <h2 className="font-bold text-xl text-gray-800 mb-4 flex items-center gap-2">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Removed Tasks
+                        </h2>
+                        <div className="space-y-2">
                             {removed.map(r => (
-                                <li key={r.id} className="p-3 flex items-center justify-between">
-                                    <div className="text-sm">{r.text}</div>
-                                    <button onClick={() => restoreTask(r.id)} className="text-sm text-blue-600 hover:underline">Add back to list</button>
-                                </li>
+                                <div key={r.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div className="text-sm text-gray-600">{r.text}</div>
+                                    <button
+                                        onClick={() => restoreTask(r.id)}
+                                        className="text-sm text-blue-600 hover:text-blue-800 font-semibold"
+                                    >
+                                        Restore
+                                    </button>
+                                </div>
                             ))}
-                        </ul>
-                    </section>
+                        </div>
+                    </div>
                 )}
             </main>
         </>
