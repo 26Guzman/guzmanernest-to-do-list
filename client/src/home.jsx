@@ -204,6 +204,96 @@ function Home({ user }) {
               </button>
             </div>
 
+            {/* Main Dashboard Statistics */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+              <div className="card p-6 bg-gradient-to-br from-blue-50 to-blue-100 border-l-4 border-blue-500">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-blue-600 font-semibold text-sm">Total Lists</p>
+                    <p className="text-3xl font-bold text-blue-700 mt-2">{lists.length}</p>
+                  </div>
+                  <svg className="w-12 h-12 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                </div>
+              </div>
+
+              <div className="card p-6 bg-gradient-to-br from-orange-50 to-orange-100 border-l-4 border-orange-500">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-orange-600 font-semibold text-sm">Total Tasks</p>
+                    <p className="text-3xl font-bold text-orange-700 mt-2">{tasks.length}</p>
+                  </div>
+                  <svg className="w-12 h-12 text-orange-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                  </svg>
+                </div>
+              </div>
+
+              <div className="card p-6 bg-gradient-to-br from-green-50 to-green-100 border-l-4 border-green-500">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-green-600 font-semibold text-sm">Completed Tasks</p>
+                    <p className="text-3xl font-bold text-green-700 mt-2">{tasks.filter(t => t.status === 'completed').length}</p>
+                  </div>
+                  <svg className="w-12 h-12 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+              </div>
+
+              <div className="card p-6 bg-gradient-to-br from-yellow-50 to-yellow-100 border-l-4 border-yellow-500">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-yellow-600 font-semibold text-sm">Pending Tasks</p>
+                    <p className="text-3xl font-bold text-yellow-700 mt-2">{tasks.filter(t => t.status === 'pending').length}</p>
+                  </div>
+                  <svg className="w-12 h-12 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            {/* Completion Rate and Quick Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div className="card p-6">
+                <h3 className="text-lg font-bold text-gray-800 mb-4">Completion Rate</h3>
+                <div className="space-y-3">
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <span className="text-sm font-semibold text-gray-700">Overall Progress</span>
+                      <span className="text-sm font-bold text-orange-600">{tasks.length === 0 ? 0 : Math.round((tasks.filter(t => t.status === 'completed').length / tasks.length) * 100)}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                      <div 
+                        className="bg-gradient-to-r from-orange-400 to-orange-600 h-3 rounded-full transition-all duration-500"
+                        style={{ width: `${tasks.length === 0 ? 0 : Math.round((tasks.filter(t => t.status === 'completed').length / tasks.length) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card p-6">
+                <h3 className="text-lg font-bold text-gray-800 mb-4">Quick Stats</h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Avg Tasks per List</span>
+                    <span className="text-xl font-bold text-gray-800">{lists.length === 0 ? 0 : (tasks.length / lists.length).toFixed(1)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Completion Rate</span>
+                    <span className="text-xl font-bold text-green-600">{tasks.length === 0 ? 0 : Math.round((tasks.filter(t => t.status === 'completed').length / tasks.length) * 100)}%</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Active Lists</span>
+                    <span className="text-xl font-bold text-blue-600">{lists.filter(l => l.status === 'pending').length}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Search Bar */}
             <div className="mb-6">
               <div className="relative">
