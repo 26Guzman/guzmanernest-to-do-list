@@ -190,7 +190,7 @@ function Home({ user }) {
           <div className="mb-10">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h1 className="text-4xl font-bold text-gray-800 mb-2">Dashboard</h1>
+                <h1 className="text-4xl font-bold text-gray-800 mb-2">To Do List</h1>
                 <p className="text-gray-600">Welcome back, <span className="font-semibold text-orange-500">{user?.name}</span>!</p>
               </div>
               <button
@@ -353,6 +353,69 @@ function Home({ user }) {
                 ))}
               </div>
             )}
+
+            {/* Tasks Table Section */}
+            <div className="card p-8 mt-12">
+              <h3 className="text-2xl font-bold text-gray-800 mb-6">All Tasks</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b-2 border-orange-500">
+                      <th className="text-left py-3 px-4 font-bold text-gray-800">LIST ID</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-800">TITLE</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-800">STATUS</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-800">ACTION</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tasks.length === 0 ? (
+                      <tr>
+                        <td colSpan="4" className="text-center py-8 text-gray-500">
+                          No tasks yet. Create a list and add tasks to see them here.
+                        </td>
+                      </tr>
+                    ) : (
+                      tasks.map((task) => {
+                        const list = lists.find(l => l.id === task.list_id)
+                        return (
+                          <tr key={task.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                            <td className="py-4 px-4 text-gray-700 font-semibold">{task.list_id}</td>
+                            <td className={`py-4 px-4 ${task.status === 'completed' ? 'line-through text-gray-400' : 'text-gray-800'}`}>
+                              {task.description}
+                            </td>
+                            <td className="py-4 px-4">
+                              <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
+                                task.status === 'completed'
+                                  ? 'bg-green-100 text-green-700'
+                                  : 'bg-yellow-100 text-yellow-700'
+                              }`}>
+                                {task.status === 'completed' ? 'Completed' : 'Pending'}
+                              </span>
+                            </td>
+                            <td className="py-4 px-4">
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => toggleTaskStatus(task.id, task.status)}
+                                  className="px-3 py-1 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition-colors"
+                                >
+                                  {task.status === 'completed' ? 'Undo' : 'Complete'}
+                                </button>
+                                <button
+                                  onClick={() => deleteTask(task.id)}
+                                  className="px-3 py-1 bg-red-500 text-white text-sm rounded-md hover:bg-red-600 transition-colors"
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         )}
 
