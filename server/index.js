@@ -4,6 +4,7 @@ import { pool } from './db.js';
 import { randomUUID } from 'crypto';
 import { hashPassword, comparePassword } from './components/hash.js';
 import dotenv from 'dotenv';
+import cors from 'cors';
 
 dotenv.config();
 
@@ -114,6 +115,11 @@ app.get('/api/get-items/:id', (req, res) => {
 });
 
 app.use(express.json());
+
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true
+}));
 
 // Mount all routes under /api
 const router = express.Router();
@@ -245,4 +251,6 @@ app.post('/api/logout', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);;
 })
+
+
 

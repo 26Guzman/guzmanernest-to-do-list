@@ -20,7 +20,7 @@ function Login({ setUser }) {
     try {
       const response = await axios.post(
         `${API_URL}/login`,
-        { name, password },
+        { username: name, password },
         { withCredentials: true } 
       )
 
