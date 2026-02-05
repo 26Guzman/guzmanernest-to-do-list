@@ -182,7 +182,9 @@ function Home({ user }) {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <main className="flex-1 container mx-auto p-6 max-w-6xl">
+      <Header user={user} setUser={null} />
+      <main className="flex-1 w-full flex justify-center px-4 py-6">
+        <div className="w-full max-w-6xl">
         {/* Header Section */}
         {!activeList && (
           <div className="mb-10">
@@ -534,6 +536,7 @@ function Home({ user }) {
             )}
           </div>
         )}
+        </div>
       </main>
     </div>
   )

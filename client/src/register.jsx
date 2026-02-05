@@ -76,27 +76,18 @@ function Register() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-500 to-orange-400 py-12 px-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-2xl p-10 animate-fadeIn">
-          {/* Logo/Icon */}
-          <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center">
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-              </svg>
-            </div>
-          </div>
-
-          <h1 className="text-3xl font-bold text-center text-gray-800 mb-2">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-500 to-orange-400 py-6 px-4">
+      <div className="w-full max-w-sm">
+        <div className="bg-white rounded-2xl shadow-2xl p-6 animate-fadeIn">
+          <h1 className="text-2xl font-bold text-center text-gray-800 mb-1">
             Get Started
           </h1>
-          <p className="text-center text-gray-500 mb-8 text-sm">
-            Create your account and start managing tasks
+          <p className="text-center text-gray-500 mb-6 text-xs">
+            Create your account and start managing
           </p>
 
           {message && (
-            <div className={`px-4 py-3 rounded-lg mb-6 text-sm font-medium animate-slideIn ${
+            <div className={`px-3 py-2 rounded-lg mb-4 text-xs font-medium animate-slideIn ${
               messageType === 'success'
                 ? 'bg-green-50 border border-green-200 text-green-700'
                 : 'bg-red-50 border border-red-200 text-red-700'
@@ -105,9 +96,9 @@ function Register() {
             </div>
           )}
 
-          <form onSubmit={handleRegister} className="space-y-4">
+          <form onSubmit={handleRegister} className="space-y-3">
             <div>
-              <label className="block mb-2 font-semibold text-gray-800 text-sm">
+              <label className="block mb-1 font-semibold text-gray-800 text-xs">
                 Username
               </label>
               <input
@@ -121,7 +112,7 @@ function Register() {
             </div>
 
             <div>
-              <label className="block mb-2 font-semibold text-gray-800 text-sm">
+              <label className="block mb-1 font-semibold text-gray-800 text-xs">
                 Full Name
               </label>
               <input
@@ -135,7 +126,7 @@ function Register() {
             </div>
 
             <div>
-              <label className="block mb-2 font-semibold text-gray-800 text-sm">
+              <label className="block mb-1 font-semibold text-gray-800 text-xs">
                 Password
               </label>
               <input
@@ -153,7 +144,7 @@ function Register() {
             </div>
 
             <div>
-              <label className="block mb-2 font-semibold text-gray-800 text-sm">
+              <label className="block mb-1 font-semibold text-gray-800 text-xs">
                 Confirm Password
               </label>
               <input
@@ -174,7 +165,7 @@ function Register() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full btn-primary disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-2 py-3 mt-6"
+              className="w-full btn-primary disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-2 py-2 mt-4"
             >
               {loading ? (
                 <>
@@ -187,16 +178,16 @@ function Register() {
             </button>
           </form>
 
-          <div className="relative my-6">
+          <div className="relative my-4">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-200"></div>
             </div>
-            <div className="relative flex justify-center text-sm">
+            <div className="relative flex justify-center text-xs">
               <span className="px-2 bg-white text-gray-500">or</span>
             </div>
           </div>
 
-          <p className="text-center text-gray-600">
+          <p className="text-center text-gray-600 text-sm">
             Already have an account?
             <Link to="/login" className="text-orange-500 font-semibold ml-1 hover:text-orange-600 transition-colors">
               Sign in
@@ -205,7 +196,7 @@ function Register() {
         </div>
 
         {/* Footer message */}
-        <p className="text-center text-white text-sm mt-6 opacity-90">
+        <p className="text-center text-white text-xs mt-4 opacity-90">
           © 2026 TaskFlow. All rights reserved.
         </p>
       </div>

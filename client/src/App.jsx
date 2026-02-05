@@ -42,15 +42,17 @@ function App() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      {user && <Header user={user} setUser={setUser} />}
-      <Routes>
-        <Route path="/" element={user ? <Home user={user} /> : <Navigate to="/login" />} />
-        <Route path="/login" element={!user ? <Login setUser={setUser} /> : <Navigate to="/" />} />
-        <Route path="/register" element={!user ? <Register /> : <Navigate to="/" />} />
-        <Route path="/list/:id" element={user ? <ListItem user={user} /> : <Navigate to="/login" />} />
-      </Routes>
-    </div>
+    <Router>
+      <div className="flex flex-col min-h-screen">
+        {user && <Header user={user} setUser={setUser} />}
+        <Routes>
+          <Route path="/" element={user ? <Home user={user} /> : <Navigate to="/login" />} />
+          <Route path="/login" element={!user ? <Login setUser={setUser} /> : <Navigate to="/" />} />
+          <Route path="/register" element={!user ? <Register /> : <Navigate to="/" />} />
+          <Route path="/list/:id" element={user ? <ListItem user={user} /> : <Navigate to="/login" />} />
+        </Routes>
+      </div>
+    </Router>
   )
 }
 

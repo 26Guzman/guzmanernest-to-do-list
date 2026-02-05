@@ -8,47 +8,47 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 5000;
 
-/* app.get('/', (req, res) => {
+/* app.get('/api/', (req, res) => {
   res.send('Aray Mo Pakak!!!!!');
 }); */
 
 
 
-/* app.get('/home', (req, res) => {
+/* app.get('/api/home', (req, res) => {
     res.send('love----joy-----hop----');
 })
 
-app.get('/get-list', (req, res) => {
+app.get('/api/get-list', (req, res) => {
     res.send('love----joy-----hop----');
 })
 
-app.get('/add-list', (req, res) => {
+app.get('/api/add-list', (req, res) => {
     res.send('love----joy-----hop----');
 })
 
-app.get('/edit-list', (req, res) => {
+app.get('/api/edit-list', (req, res) => {
     res.send('love----joy-----hop----');
 })
 
-app.get('/delet-list', (req, res) => {
+app.get('/api/delet-list', (req, res) => {
     res.send('love----joy-----hop----');
 })
 
-app.get('/get-item', (req, res) => {
+app.get('/api/get-item', (req, res) => {
     res.send('love----joy-----hop----');
 })
 
-app.get('/add-item', (req, res) => {
+app.get('/api/add-item', (req, res) => {
     res.send('love----joy-----hop----');
 })
 
-app.get('/edit-item', (req, res) => {
+app.get('/api/edit-item', (req, res) => {
     res.send('love----joy-----hop----');
 })
 
-app.get('/delete-item', (req, res) => {
+app.get('/api/delete-item', (req, res) => {
     res.send('love----joy-----hop----');
 }) */
 
@@ -95,12 +95,12 @@ const items = [
     }
 ];
 
-app.get('/get-lists', async (req, res) => {
+app.get('/api/get-lists', async (req, res) => {
     const list = await pool.query('SELECT * FROM list');
     res.status(200).json({ success: true, lists: list.rows });
 });
 
-app.get('/get-items/:id', (req, res) => {
+app.get('/api/get-items/:id', (req, res) => {
     const listId = req.params.id;
     const fillteredItems = items.filter(
         item => item.listId == listId);
@@ -115,11 +115,15 @@ app.get('/get-items/:id', (req, res) => {
 
 app.use(express.json());
 
+// Mount all routes under /api
+const router = express.Router();
+app.use('/api', router);
+
 app.use(session({
     secret: 'secret',
 }));
 
-app.post('/add-list', async (req, res) => {
+app.post('/api/add-list', async (req, res) => {
     const { listtitle } = req.body;
     const id = randomUUID();
     const listId = randomUUID();
@@ -129,7 +133,7 @@ app.post('/add-list', async (req, res) => {
     res.status(200).json({ success: true, message: 'List added successfully', id, listId });
 });
 
-app.post('/edit-list', async (req, res) => {
+app.post('/api/edit-list', async (req, res) => {
     const { id, listtitle } = req.body;
 
     await pool.query('UPDATE list SET title = $2 WHERE id = $1', [id, listtitle]);
@@ -137,7 +141,7 @@ app.post('/edit-list', async (req, res) => {
     res.status(200).json({ success: true, message: 'List updated successfully' });
 });
 
-app.post('/delete-list', async (req, res) => {
+app.post('/api/delete-list', async (req, res) => {
     const { id } = req.body;
 
     await pool.query('DELETE FROM list WHERE id = $1', [id]);
@@ -146,7 +150,7 @@ app.post('/delete-list', async (req, res) => {
 });
 
 
-app.post('/add-item', async (req, res) => {
+app.post('/api/add-item', async (req, res) => {
     const { listId: providedListId, description } = req.body;
     const id = randomUUID();
     const listId = providedListId || randomUUID();
@@ -156,7 +160,7 @@ app.post('/add-item', async (req, res) => {
     res.status(200).json({ success: true, message: 'Item added successfully', id, listId });
 });
 
-app.post('/edit-item', async (req, res) => {
+app.post('/api/edit-item', async (req, res) => {
     const { listId, description, status } = req.body;
 
     await pool.query('UPDATE items SET description = $2, status = $3 WHERE list_id = $1', [listId, description, status]);
@@ -164,7 +168,7 @@ app.post('/edit-item', async (req, res) => {
     res.status(200).json({ success: true, message: 'Item updated successfully' });
 });
 
-app.post('/delete-items', async (req, res) => {
+app.post('/api/delete-items', async (req, res) => {
     const { listId } = req.body;
 
     await pool.query('DELETE FROM items WHERE list_id = $1', [listId]);
@@ -172,7 +176,7 @@ app.post('/delete-items', async (req, res) => {
     res.status(200).json({ success: true, message: 'Item deleted successfully' });
 });
 
-app.post('/register', async (req, res) => {
+app.post('/api/register', async (req, res) => {
     const { password, username, name } = req.body;
     const id = randomUUID();
     try {
@@ -187,7 +191,7 @@ app.post('/register', async (req, res) => {
 
 
 
-app.post('/login', async (req, res) => {
+app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
 
     try {
@@ -212,7 +216,7 @@ app.post('/login', async (req, res) => {
     }
 });
 
-app.get('/get-session', (req, res) => {
+app.get('/api/get-session', (req, res) => {
     if (req.session.user) {
         res.status(200).json({
             success: true,
@@ -227,7 +231,7 @@ app.get('/get-session', (req, res) => {
     }
 });
 
-app.post('/logout', (req, res) => {
+app.post('/api/logout', (req, res) => {
     req.session.destroy((err) => {
         if (err) {
             return res.status(500).json({ success: false, message: 'Logout failed' });
@@ -239,5 +243,6 @@ app.post('/logout', (req, res) => {
 
 
 app.listen(PORT, () => {
-    console.log('Server is running on http://localhost:${PORT}');
+    console.log(`Server is running on http://localhost:${PORT}`);;
 })
+

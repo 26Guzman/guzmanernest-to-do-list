@@ -45,28 +45,19 @@ function Login({ setUser }) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-500 to-orange-400 py-12 px-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-500 to-orange-400 py-6 px-4">
+      <div className="w-full max-w-sm">
         {/* Animated card */}
-        <div className="bg-white rounded-2xl shadow-2xl p-10 animate-fadeIn">
-          {/* Logo/Icon */}
-          <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center">
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-            </div>
-          </div>
-
-          <h1 className="text-3xl font-bold text-center text-gray-800 mb-2">
+        <div className="bg-white rounded-2xl shadow-2xl p-6 animate-fadeIn">
+          <h1 className="text-2xl font-bold text-center text-gray-800 mb-1">
             Welcome Back
           </h1>
-          <p className="text-center text-gray-500 mb-8 text-sm">
-            Sign in to manage your tasks efficiently
+          <p className="text-center text-gray-500 mb-6 text-xs">
+            Sign in to manage your tasks
           </p>
 
           {message && (
-            <div className={`px-4 py-3 rounded-lg mb-6 text-sm font-medium animate-slideIn ${
+            <div className={`px-3 py-2 rounded-lg mb-4 text-xs font-medium animate-slideIn ${
               messageType === 'success'
                 ? 'bg-green-50 border border-green-200 text-green-700'
                 : 'bg-red-50 border border-red-200 text-red-700'
@@ -75,9 +66,9 @@ function Login({ setUser }) {
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-5">
+          <form onSubmit={handleLogin} className="space-y-3">
             <div>
-              <label className="block mb-2 font-semibold text-gray-800 text-sm">
+              <label className="block mb-1 font-semibold text-gray-800 text-xs">
                 Name
               </label>
               <input
@@ -91,7 +82,7 @@ function Login({ setUser }) {
             </div>
 
             <div>
-              <label className="block mb-2 font-semibold text-gray-800 text-sm">
+              <label className="block mb-1 font-semibold text-gray-800 text-xs">
                 Password
               </label>
               <input
@@ -107,7 +98,7 @@ function Login({ setUser }) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full btn-primary disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-2 py-3"
+              className="w-full btn-primary disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-2 py-2"
             >
               {loading ? (
                 <>
@@ -120,16 +111,16 @@ function Login({ setUser }) {
             </button>
           </form>
 
-          <div className="relative my-6">
+          <div className="relative my-4">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-200"></div>
             </div>
-            <div className="relative flex justify-center text-sm">
+            <div className="relative flex justify-center text-xs">
               <span className="px-2 bg-white text-gray-500">or</span>
             </div>
           </div>
 
-          <p className="text-center text-gray-600">
+          <p className="text-center text-gray-600 text-sm">
             Don't have an account?
             <Link to="/register" className="text-orange-500 font-semibold ml-1 hover:text-orange-600 transition-colors">
               Create one
@@ -138,7 +129,7 @@ function Login({ setUser }) {
         </div>
 
         {/* Footer message */}
-        <p className="text-center text-white text-sm mt-6 opacity-90">
+        <p className="text-center text-white text-xs mt-4 opacity-90">
           © 2026 TaskFlow. All rights reserved.
         </p>
       </div>
