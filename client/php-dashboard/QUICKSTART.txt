@@ -1,0 +1,168 @@
+TASKFLOW DASHBOARD - PHP VERSION
+=================================
+
+QUICK START GUIDE (5 Minutes)
+
+STEP 1: Import Database
+-----------------------
+1. Open phpMyAdmin (http://localhost/phpmyadmin/)
+2. Click "Import" tab
+3. Choose "database-structure.sql" file from php-dashboard folder
+4. Click "Go" to import
+
+OR use command line:
+$ mysql -u root -p < php-dashboard/database-structure.sql
+
+
+STEP 2: Update Database Credentials
+------------------------------------
+Edit: php-dashboard/db-connection.php
+
+Change these lines to match your MySQL setup:
+  define('DB_HOST', 'localhost');      // Your host
+  define('DB_USER', 'root');           // Your username
+  define('DB_PASS', '');               // Your password
+  define('DB_NAME', 'taskflow_db');    // Database name
+
+
+STEP 3: Upload Files to Web Server
+-----------------------------------
+Copy these files to your web folder:
+  ✅ dashboard.php
+  ✅ edit.php
+  ✅ create.php
+  ✅ db-connection.php
+
+Examples:
+  - XAMPP: C:\xampp\htdocs\your-folder\
+  - WAMP: C:\wamp\www\your-folder\
+  - Online: /public_html/your-folder/
+
+
+STEP 4: Open in Browser
+-----------------------
+Navigate to:
+  http://localhost/your-folder/dashboard.php
+
+You should see:
+  ✅ 3 stat cards (Pending, In Progress, Completed)
+  ✅ Table with 5 sample tasks
+  ✅ Edit and Delete buttons for each task
+
+
+FILE STRUCTURE
+==============
+
+dashboard.php
+  ↳ Main dashboard page
+  ↳ Shows task overview and list
+  ↳ Handles task deletion
+  ↳ Displays success/error messages
+
+edit.php
+  ↳ Edit task page
+  ↳ Update task title, category, status, etc
+  ↳ Requires "?id=1" in URL
+
+create.php
+  ↳ Create new task page
+  ↳ Add new tasks to database
+  ↳ Form validation included
+
+db-connection.php
+  ↳ Database configuration file
+  ↳ Connection settings
+  ↳ DO NOT expose this file publicly in production!
+
+
+FEATURES
+========
+
+✅ View all tasks in a table
+✅ See task counts by status
+✅ Edit task details
+✅ Delete tasks
+✅ Status badges (Pending, In Progress, Completed)
+✅ Responsive Bootstrap 5 design
+✅ Professional UI with icons
+✅ Alert messages for feedback
+
+
+SAMPLE DATA
+===========
+
+The SQL file includes 5 sample tasks:
+  1. Design Dashboard UI - Pending
+  2. Connect Database - In Progress
+  3. Testing & Debugging - Completed
+  4. API Integration - Pending
+  5. User Authentication - In Progress
+
+
+TROUBLESHOOTING
+===============
+
+Problem: "Connection failed" error
+Solution: Check MySQL is running and credentials are correct
+
+Problem: No tasks showing
+Solution: Verify database was imported, check table name is "tasks"
+
+Problem: Styling looks wrong (no Bootstrap)
+Solution: Check internet connection (Bootstrap is loaded from CDN)
+
+Problem: Blank white page
+Solution: Check PHP errors in browser console or server logs
+
+
+NEXT STEPS
+==========
+
+Want to enhance the dashboard? Try:
+  ☐ Add user login/authentication
+  ☐ Add task search/filter functionality
+  ☐ Add task categories filter
+  ☐ Add bulk delete feature
+  ☐ Add task priority levels
+  ☐ Add due date sorting
+  ☐ Add task comments/notes
+  ☐ Use prepared statements for better security
+  ☐ Add task export (CSV/PDF)
+  ☐ Add email notifications
+
+
+SUPPORT
+=======
+
+Read the detailed README.md for:
+  - Full installation guide
+  - Database schema details
+  - Security recommendations
+  - Customization tips
+
+
+IMPORTANT SECURITY NOTE
+=======================
+
+For PRODUCTION use:
+  1. Use prepared statements instead of string escaping
+  2. Add user authentication
+  3. Do not expose db-connection.php
+  4. Add CSRF token protection
+  5. Sanitize all user inputs
+  6. Use HTTPS only
+  7. Keep PHP, MySQL, and libraries updated
+
+See README.md for prepared statement examples!
+
+
+CREDITS
+=======
+
+Built with:
+  - PHP 7.4+
+  - MySQL 5.7+
+  - Bootstrap 5.3
+  - Bootstrap Icons 1.11
+
+Enjoy your TaskFlow Dashboard! 🚀

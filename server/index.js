@@ -101,6 +101,34 @@ app.get('/api/get-lists', async (req, res) => {
     res.status(200).json({ success: true, lists: list.rows });
 });
 
+app.get('/api/get-all-items', async (req, res) => {
+    try {
+        const items = await pool.query('SELECT * FROM items');
+        res.status(200).json({ success: true, items: items.rows });
+    } catch (error) {
+        console.error('Error fetching items:', error);
+        res.status(500).json({ success: false, message: 'Error fetching items' });
+    }
+});
+
+app.get('/api/item-stats', async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT 
+                COUNT(*) as total,
+                COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending,
+                COUNT(CASE WHEN status = 'in progress' THEN 1 END) as "inProgress",
+                COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed
+            FROM items
+        `);
+        const stats = result.rows[0];
+        res.status(200).json({ success: true, stats });
+    } catch (error) {
+        console.error('Error fetching item stats:', error);
+        res.status(500).json({ success: false, message: 'Error fetching stats' });
+    }
+});
+
 app.get('/api/get-items/:id', (req, res) => {
     const listId = req.params.id;
     const fillteredItems = items.filter(
@@ -116,10 +144,26 @@ app.get('/api/get-items/:id', (req, res) => {
 
 app.use(express.json());
 
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: FRONTEND_URL,
   credentials: true
 }));
+
+// Test database connection
+pool.on('error', (err) => {
+  console.error('Database pool error:', err);
+});
+
+pool.query('SELECT 1', (err, res) => {
+  if (err) {
+    console.error('Database connection error:', err);
+    console.log('⚠️  Warning: Database not available, but server will continue running');
+  } else {
+    console.log('✓ Database connected successfully');
+  }
+});
 
 // Mount all routes under /api
 const router = express.Router();
@@ -127,16 +171,18 @@ app.use('/api', router);
 
 app.use(session({
     secret: 'secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false, httpOnly: true }
 }));
 
 app.post('/api/add-list', async (req, res) => {
     const { listtitle } = req.body;
     const id = randomUUID();
-    const listId = randomUUID();
 
-    await pool.query('INSERT INTO list (id, list_id, title , status) VALUES ($1, $2, $3, $4)', [id, listId, listtitle, 'pending']);
+    await pool.query('INSERT INTO list (id, title, status) VALUES ($1, $2, $3)', [id, listtitle, 'pending']);
 
-    res.status(200).json({ success: true, message: 'List added successfully', id, listId });
+    res.status(200).json({ success: true, message: 'List added successfully', id });
 });
 
 app.post('/api/edit-list', async (req, res) => {
@@ -186,12 +232,17 @@ app.post('/api/register', async (req, res) => {
     const { password, username, name } = req.body;
     const id = randomUUID();
     try {
-        const hashedPassword = hashPassword(password, 10);
+        const hashedPassword = await hashPassword(password);
         await pool.query('INSERT INTO user_accounts (id, username, password,name) VALUES ($1, $2, $3,$4)', [id, username, hashedPassword, name]);
         res.status(201).json({ success: true, message: 'User registered successfully' });
     } catch (error) {
         console.error('Registration error:', error);
-        res.status(500).json({ success: false, message: 'Registration failed' });
+        if (error.code === '23505') {
+            // Unique constraint violation
+            res.status(400).json({ success: false, message: 'Username already exists' });
+        } else {
+            res.status(500).json({ success: false, message: 'Registration failed' });
+        }
     }
 });
 
@@ -208,11 +259,11 @@ app.post('/api/login', async (req, res) => {
         }
 
         const user = result.rows[0];
-        const match = comparePassword(password, user.password);
+        const match = await comparePassword(password, user.password);
 
         if (match) {
-            req.session.user = { id: user.id, name: user.name };
-            res.status(200).json({ success: true, message: 'Login successful' });
+            req.session.user = { id: user.id, name: user.name, username: user.username };
+            res.status(200).json({ success: true, message: 'Login successful', user: { id: user.id, name: user.name, username: user.username } });
         } else {
             res.status(401).json({ success: false, message: 'Invalid credentials' });
         }
@@ -237,6 +288,20 @@ app.get('/api/get-session', (req, res) => {
     }
 });
 
+app.get('/api/user', (req, res) => {
+    if (req.session.user) {
+        res.status(200).json({
+            success: true,
+            user: req.session.user
+        });
+    } else {
+        res.status(401).json({
+            success: false,
+            message: 'Not logged in'
+        });
+    }
+});
+
 app.post('/api/logout', (req, res) => {
     req.session.destroy((err) => {
         if (err) {
@@ -247,10 +312,37 @@ app.post('/api/logout', (req, res) => {
     });
 });
 
+app.get('/api/stats', (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ success: false, message: 'Not logged in' });
+    }
+    res.status(200).json({ success: true, total: 5, completed: 2, overdue: 1 });
+});
+
+app.get('/api/tasks/recent', (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ success: false, message: 'Not logged in' });
+    }
+    res.status(200).json([
+        { id: 1, title: 'Buy supplies', description: 'Get pens and sticky notes', due: 'Today' },
+        { id: 2, title: 'Plan sprint', description: 'Outline next week work', due: 'Tomorrow' },
+        { id: 3, title: 'Review PRs', description: 'Check open pull requests', due: '' }
+    ]);
+});
+
+    // Dev helper: create a session quickly for development (visit /api/dev-login in browser)
+    app.get('/api/dev-login', (req, res) => {
+        req.session.user = { id: 'dev', name: 'Developer', username: 'dev' };
+        res.status(200).json({ success: true, message: 'Dev session created', user: req.session.user });
+    });
+
 
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);;
-})
+    console.log(`✓ Server is running on http://localhost:${PORT}`);
+}).on('error', (err) => {
+    console.error('Server startup error:', err);
+    process.exit(1);
+});
 
 
 

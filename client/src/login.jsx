@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import axios from 'axios'
-import { Link } from 'react-router-dom'
+import api from './api'
+import { Link, useNavigate } from 'react-router-dom'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 function Login({ setUser }) {
+  const navigate = useNavigate()
   const [name, setName] = useState('')
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
@@ -18,18 +19,14 @@ function Login({ setUser }) {
     setLoading(true)
 
     try {
-      const response = await axios.post(
-        `${API_URL}/login`,
-        { username: name, password },
-        { withCredentials: true } 
-      )
+      const response = await api.post('/login', { username: name, password })
 
       if (response.data.success) {
         setMessage('✓ Login successful! Redirecting...')
         setMessageType('success')
         setUser(response.data.user)
         setTimeout(() => {
-          window.location.href = '/'
+          navigate('/dashboard')
         }, 1500)
       } else {
         setMessage(response.data.message || 'Invalid credentials')
@@ -69,14 +66,14 @@ function Login({ setUser }) {
           <form onSubmit={handleLogin} className="space-y-3">
             <div>
               <label className="block mb-1 font-semibold text-gray-800 text-xs">
-                Name
+                Username
               </label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                placeholder="Enter your name"
+                placeholder="Enter your username"
                 className="form-input"
               />
             </div>

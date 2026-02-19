@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow Setup Guide</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .setup-container { max-width: 900px; margin: 40px auto; }
+        .step-card { margin-bottom: 20px; border-left: 4px solid #667eea; }
+        code { background-color: #f4f4f4; padding: 2px 6px; border-radius: 3px; }
+        .file-structure { background: #272822; color: #f8f8f2; padding: 15px; border-radius: 5px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div class="setup-container">
+        <div class="card shadow-lg">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Dashboard - Setup Guide</h3>
+            </div>
+            <div class="card-body">
+                <!-- Step 1 -->
+                <div class="card step-card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Step 1: Import Database (5 minutes)</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>Option A: Using phpMyAdmin (Easiest)</h6>
+                        <ol>
+                            <li>Open <code>http://localhost/phpmyadmin/</code></li>
+                            <li>Click the <strong>Import</strong> tab</li>
+                            <li>Upload <code>database-structure.sql</code></li>
+                            <li>Click <strong>Go</strong></li>
+                        </ol>
+                        
+                        <h6 class="mt-3">Option B: Using Command Line</h6>
+                        <div class="file-structure">
+mysql -u root -p < database-structure.sql
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="card step-card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Step 2: Configure Database</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Edit <strong>db-connection.php</strong> and update:</p>
+                        <div class="file-structure">
+define('DB_HOST', 'localhost');   // Your host
+define('DB_USER', 'root');        // Your username
+define('DB_PASS', '');            // Your password
+define('DB_NAME', 'taskflow_db'); // Database name
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="card step-card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Step 3: Upload Files</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Copy these files to your web folder:</p>
+                        <div class="file-structure">
+✓ index.php
+✓ dashboard.php
+✓ create.php
+✓ edit.php
+✓ db-connection.php
+                        </div>
+                        <p class="mt-3"><strong>Upload to:</strong></p>
+                        <ul>
+                            <li>XAMPP: <code>C:\xampp\htdocs\your-folder\</code></li>
+                            <li>WAMP: <code>C:\wamp\www\your-folder\</code></li>
+                            <li>Online: <code>/public_html/your-folder/</code></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="card step-card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Step 4: Test the Application</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Open in your browser:</p>
+                        <code>http://localhost/your-folder/</code>
+                        
+                        <p class="mt-3">You should see:</p>
+                        <ul>
+                            <li>✅ Statistics cards with task counts</li>
+                            <li>✅ 5 sample tasks in the dashboard</li>
+                            <li>✅ Navigation buttons to Create, View, Edit tasks</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- File Structure -->
+                <div class="card step-card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">File Structure & Purpose</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>File</th>
+                                    <th>Purpose</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>index.php</code></td>
+                                    <td>Landing page with statistics & navigation</td>
+                                </tr>
+                                <tr>
+                                    <td><code>dashboard.php</code></td>
+                                    <td>Main dashboard with task list & delete functionality</td>
+                                </tr>
+                                <tr>
+                                    <td><code>create.php</code></td>
+                                    <td>Form to add new tasks</td>
+                                </tr>
+                                <tr>
+                                    <td><code>edit.php</code></td>
+                                    <td>Form to modify existing tasks</td>
+                                </tr>
+                                <tr>
+                                    <td><code>db-connection.php</code></td>
+                                    <td>Database configuration & connection</td>
+                                </tr>
+                                <tr>
+                                    <td><code>database-structure.sql</code></td>
+                                    <td>SQL file with table schema & sample data</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Features -->
+                <div class="card step-card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Available Features</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Dashboard Functions</h6>
+                                <ul>
+                                    <li>View all tasks</li>
+                                    <li>Count tasks by status</li>
+                                    <li>Delete tasks</li>
+                                    <li>Status badges</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Task Management</h6>
+                                <ul>
+                                    <li>Create new tasks</li>
+                                    <li>Edit task details</li>
+                                    <li>Change task status</li>
+                                    <li>Set due dates</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Troubleshooting -->
+                <div class="card step-card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Troubleshooting</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>❌ "Connection failed" Error</h6>
+                        <ul>
+                            <li>Check MySQL is running</li>
+                            <li>Verify database credentials in db-connection.php</li>
+                            <li>Check database name is correct</li>
+                        </ul>
+
+                        <h6 class="mt-3">❌ No tasks appearing</h6>
+                        <ul>
+                            <li>Verify database-structure.sql was imported</li>
+                            <li>Check tasks table exists</li>
+                            <li>Verify sample data was inserted</li>
+                        </ul>
+
+                        <h6 class="mt-3">❌ Styling looks broken</h6>
+                        <ul>
+                            <li>Check internet connection (Bootstrap is from CDN)</li>
+                            <li>Check browser console for CSS errors</li>
+                            <li>Try clearing browser cache</li>
+                        </ul>
+
+                        <h6 class="mt-3">❌ Blank white page</h6>
+                        <ul>
+                            <li>Enable PHP error reporting</li>
+                            <li>Check server error logs</li>
+                            <li>Verify PHP version (need 7.4+)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Security -->
+                <div class="alert alert-warning">
+                    <h5>🔒 Security Recommendations</h5>
+                    <ul>
+                        <li>Use environment variables for database credentials</li>
+                        <li>Enable HTTPS in production</li>
+                        <li>Use prepared statements for queries</li>
+                        <li>Add user authentication</li>
+                        <li>Implement CSRF token protection</li>
+                        <li>Keep PHP and dependencies updated</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center mt-5 mb-5 text-muted">
+        <small>TaskFlow &copy; 2026 | PHP, MySQL & Bootstrap 5</small>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

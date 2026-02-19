@@ -1,0 +1,10 @@
+{
+  "name": "guzmanernest-to-do-list",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "npm --prefix client run dev",
+    "client": "npm --prefix client run dev",
+    "server": "npm --prefix server run start"
+  }
+}

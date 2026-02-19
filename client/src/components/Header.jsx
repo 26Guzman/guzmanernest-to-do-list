@@ -23,7 +23,7 @@ function Header({ user, setUser }) {
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
           <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
           </div>
@@ -32,22 +32,31 @@ function Header({ user, setUser }) {
 
         {user && (
           <div className="flex items-center gap-6">
-            <div className="hidden md:flex items-center gap-3">
-              <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center font-bold text-sm">
-                {user.name.charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <p className="text-sm font-semibold">{user.name}</p>
-                <p className="text-xs opacity-75">@{user.username}</p>
-              </div>
-            </div>
+            <div className="hidden md:flex items-center gap-6">
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="px-3 py-2 bg-white bg-opacity-10 hover:bg-opacity-20 rounded-lg transition-all duration-200 font-semibold text-sm"
+              >
+                Dashboard
+              </button>
 
-            <button
-              onClick={handleLogout}
-              className="hidden md:block px-4 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg transition-all duration-300 font-semibold text-sm"
-            >
-              Logout
-            </button>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center font-bold text-sm">
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">{user.name}</p>
+                  <p className="text-xs opacity-75">@{user.username}</p>
+                </div>
+              </div>
+
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg transition-all duration-300 font-semibold text-sm"
+              >
+                Logout
+              </button>
+            </div>
 
             {/* Mobile menu button */}
             <button
@@ -75,7 +84,13 @@ function Header({ user, setUser }) {
             </div>
           </div>
           <button
-            onClick={handleLogout}
+            onClick={() => { setMenuOpen(false); navigate('/dashboard') }}
+            className="w-full px-4 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg transition-all text-left font-semibold"
+          >
+            Dashboard
+          </button>
+          <button
+            onClick={() => { setMenuOpen(false); handleLogout() }}
             className="w-full px-4 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg transition-all text-left font-semibold"
           >
             Logout

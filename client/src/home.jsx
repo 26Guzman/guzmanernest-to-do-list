@@ -21,12 +21,12 @@ function Home({ user }) {
   const fetchLists = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`${API_URL}/lists`, {
+      const response = await fetch(`${API_URL}/get-lists`, {
         credentials: 'include'
       })
       const data = await response.json()
       if (data.success) {
-        setLists(data.lists)
+        setLists(data.lists || [])
       } else {
         setError('Failed to load lists')
       }
@@ -40,7 +40,7 @@ function Home({ user }) {
 
   const fetchTasks = async (listId) => {
     try {
-      const response = await fetch(`${API_URL}/lists/${listId}/items`, {
+      const response = await fetch(`${API_URL}/get-items/${listId}`, {
         credentials: 'include'
       })
       const data = await response.json()
@@ -54,15 +54,15 @@ function Home({ user }) {
 
   const addList = async (title, description = '') => {
     try {
-      const response = await fetch(`${API_URL}/lists`, {
+      const response = await fetch(`${API_URL}/add-list`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ title, description, status: 'pending' })
+        body: JSON.stringify({ listtitle: title, description, status: 'pending' })
       })
       const data = await response.json()
       if (data.success) {
-        setLists([data.list, ...lists])
+        fetchLists()
         setShowForm(false)
       }
     } catch (err) {
@@ -73,9 +73,11 @@ function Home({ user }) {
   const deleteList = async (listId) => {
     if (!window.confirm('Are you sure you want to delete this list?')) return
     try {
-      const response = await fetch(`${API_URL}/lists/${listId}`, {
-        method: 'DELETE',
-        credentials: 'include'
+      const response = await fetch(`${API_URL}/delete-list`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ id: listId })
       })
       const data = await response.json()
       if (data.success) {
@@ -89,15 +91,15 @@ function Home({ user }) {
 
   const updateList = async (listId, title, description) => {
     try {
-      const response = await fetch(`${API_URL}/lists/${listId}`, {
-        method: 'PUT',
+      const response = await fetch(`${API_URL}/edit-list`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ title, description })
+        body: JSON.stringify({ id: listId, listtitle: title })
       })
       const data = await response.json()
       if (data.success) {
-        setLists(lists.map(l => l.id === listId ? { ...l, title, description } : l))
+        setLists(lists.map(l => l.id === listId ? { ...l, title } : l))
         setIsEditing(false)
       }
     } catch (err) {
@@ -109,11 +111,11 @@ function Home({ user }) {
     const newStatus = currentStatus === 'pending' ? 'completed' : 'pending'
     try {
       const list = lists.find(l => l.id === listId)
-      const response = await fetch(`${API_URL}/lists/${listId}`, {
-        method: 'PUT',
+      const response = await fetch(`${API_URL}/edit-list`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ title: list.title, description: list.description, status: newStatus })
+        body: JSON.stringify({ id: listId, listtitle: list.title })
       })
       const data = await response.json()
       if (data.success) {
@@ -126,15 +128,15 @@ function Home({ user }) {
 
   const addTask = async (listId, taskDescription) => {
     try {
-      const response = await fetch(`${API_URL}/items`, {
+      const response = await fetch(`${API_URL}/add-item`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ list_id: listId, description: taskDescription, status: 'pending' })
+        body: JSON.stringify({ listId: listId, description: taskDescription, status: 'pending' })
       })
       const data = await response.json()
       if (data.success) {
-        setTasks([...tasks, data.item])
+        fetchTasks(listId)
       }
     } catch (err) {
       console.error('Error adding task:', err)
@@ -143,9 +145,11 @@ function Home({ user }) {
 
   const deleteTask = async (taskId) => {
     try {
-      const response = await fetch(`${API_URL}/items/${taskId}`, {
-        method: 'DELETE',
-        credentials: 'include'
+      const response = await fetch(`${API_URL}/delete-items`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ id: taskId })
       })
       const data = await response.json()
       if (data.success) {
@@ -159,11 +163,12 @@ function Home({ user }) {
   const toggleTaskStatus = async (taskId, currentStatus) => {
     const newStatus = currentStatus === 'pending' ? 'completed' : 'pending'
     try {
-      const response = await fetch(`${API_URL}/items/${taskId}`, {
-        method: 'PUT',
+      const task = tasks.find(t => t.id === taskId)
+      const response = await fetch(`${API_URL}/edit-item`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify({ listId: task.list_id, description: task.description, status: newStatus })
       })
       const data = await response.json()
       if (data.success) {
@@ -183,15 +188,15 @@ function Home({ user }) {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Header user={user} setUser={null} />
-      <main className="flex-1 w-full flex justify-center px-4 py-6">
+      <main className="flex-1 w-full flex justify-center px-3 py-3">
         <div className="w-full max-w-6xl">
         {/* Header Section */}
         {!activeList && (
-          <div className="mb-10">
-            <div className="flex items-center justify-between mb-8">
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-4">
               <div>
-                <h1 className="text-4xl font-bold text-gray-800 mb-2">To Do List</h1>
-                <p className="text-gray-600">Welcome back, <span className="font-semibold text-orange-500">{user?.name}</span>!</p>
+                <h1 className="text-xl font-bold text-gray-800 mb-1">To Do List</h1>
+                <p className="text-xs text-gray-600">Welcome back, <span className="font-semibold text-orange-500">{user?.name}</span>!</p>
               </div>
               <button
                 onClick={() => setShowForm(!showForm)}
@@ -205,50 +210,50 @@ function Home({ user }) {
             </div>
 
             {/* Main Dashboard Statistics */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-              <div className="card p-6 bg-gradient-to-br from-blue-50 to-blue-100 border-l-4 border-blue-500">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+              <div className="card p-3 bg-gradient-to-br from-blue-50 to-blue-100 border-l-4 border-blue-500">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-blue-600 font-semibold text-sm">Total Lists</p>
-                    <p className="text-3xl font-bold text-blue-700 mt-2">{lists.length}</p>
+                    <p className="text-blue-600 font-semibold text-xs">Total Lists</p>
+                    <p className="text-lg font-bold text-blue-700 mt-1">{lists.length}</p>
                   </div>
-                  <svg className="w-12 h-12 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                   </svg>
                 </div>
               </div>
 
-              <div className="card p-6 bg-gradient-to-br from-orange-50 to-orange-100 border-l-4 border-orange-500">
+              <div className="card p-3 bg-gradient-to-br from-orange-50 to-orange-100 border-l-4 border-orange-500">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-orange-600 font-semibold text-sm">Total Tasks</p>
-                    <p className="text-3xl font-bold text-orange-700 mt-2">{tasks.length}</p>
+                    <p className="text-orange-600 font-semibold text-xs">Total Tasks</p>
+                    <p className="text-lg font-bold text-orange-700 mt-1">{tasks.length}</p>
                   </div>
-                  <svg className="w-12 h-12 text-orange-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6 text-orange-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                   </svg>
                 </div>
               </div>
 
-              <div className="card p-6 bg-gradient-to-br from-green-50 to-green-100 border-l-4 border-green-500">
+              <div className="card p-3 bg-gradient-to-br from-green-50 to-green-100 border-l-4 border-green-500">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-green-600 font-semibold text-sm">Completed Tasks</p>
-                    <p className="text-3xl font-bold text-green-700 mt-2">{tasks.filter(t => t.status === 'completed').length}</p>
+                    <p className="text-green-600 font-semibold text-xs">Completed Tasks</p>
+                    <p className="text-lg font-bold text-green-700 mt-1">{tasks.filter(t => t.status === 'completed').length}</p>
                   </div>
-                  <svg className="w-12 h-12 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
               </div>
 
-              <div className="card p-6 bg-gradient-to-br from-yellow-50 to-yellow-100 border-l-4 border-yellow-500">
+              <div className="card p-3 bg-gradient-to-br from-yellow-50 to-yellow-100 border-l-4 border-yellow-500">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-yellow-600 font-semibold text-sm">Pending Tasks</p>
-                    <p className="text-3xl font-bold text-yellow-700 mt-2">{tasks.filter(t => t.status === 'pending').length}</p>
+                    <p className="text-yellow-600 font-semibold text-xs">Pending Tasks</p>
+                    <p className="text-lg font-bold text-yellow-700 mt-1">{tasks.filter(t => t.status === 'pending').length}</p>
                   </div>
-                  <svg className="w-12 h-12 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
@@ -256,18 +261,18 @@ function Home({ user }) {
             </div>
 
             {/* Completion Rate and Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <div className="card p-6">
-                <h3 className="text-lg font-bold text-gray-800 mb-4">Completion Rate</h3>
-                <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+              <div className="card p-3">
+                <h3 className="text-sm font-bold text-gray-800 mb-2">Completion Rate</h3>
+                <div className="space-y-2">
                   <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm font-semibold text-gray-700">Overall Progress</span>
-                      <span className="text-sm font-bold text-orange-600">{tasks.length === 0 ? 0 : Math.round((tasks.filter(t => t.status === 'completed').length / tasks.length) * 100)}%</span>
+                    <div className="flex justify-between mb-1">
+                      <span className="text-xs font-semibold text-gray-700">Overall Progress</span>
+                      <span className="text-xs font-bold text-orange-600">{tasks.length === 0 ? 0 : Math.round((tasks.filter(t => t.status === 'completed').length / tasks.length) * 100)}%</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                    <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                       <div 
-                        className="bg-gradient-to-r from-orange-400 to-orange-600 h-3 rounded-full transition-all duration-500"
+                        className="bg-gradient-to-r from-orange-400 to-orange-600 h-2 rounded-full transition-all duration-500"
                         style={{ width: `${tasks.length === 0 ? 0 : Math.round((tasks.filter(t => t.status === 'completed').length / tasks.length) * 100)}%` }}
                       />
                     </div>
@@ -275,29 +280,29 @@ function Home({ user }) {
                 </div>
               </div>
 
-              <div className="card p-6">
-                <h3 className="text-lg font-bold text-gray-800 mb-4">Quick Stats</h3>
-                <div className="space-y-2">
+              <div className="card p-3">
+                <h3 className="text-sm font-bold text-gray-800 mb-2">Quick Stats</h3>
+                <div className="space-y-1">
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Avg Tasks per List</span>
-                    <span className="text-xl font-bold text-gray-800">{lists.length === 0 ? 0 : (tasks.length / lists.length).toFixed(1)}</span>
+                    <span className="text-xs text-gray-600">Avg Tasks per List</span>
+                    <span className="text-sm font-bold text-gray-800">{lists.length === 0 ? 0 : (tasks.length / lists.length).toFixed(1)}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Completion Rate</span>
-                    <span className="text-xl font-bold text-green-600">{tasks.length === 0 ? 0 : Math.round((tasks.filter(t => t.status === 'completed').length / tasks.length) * 100)}%</span>
+                    <span className="text-xs text-gray-600">Completion Rate</span>
+                    <span className="text-sm font-bold text-green-600">{tasks.length === 0 ? 0 : Math.round((tasks.filter(t => t.status === 'completed').length / tasks.length) * 100)}%</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Active Lists</span>
-                    <span className="text-xl font-bold text-blue-600">{lists.filter(l => l.status === 'pending').length}</span>
+                    <span className="text-xs text-gray-600">Active Lists</span>
+                    <span className="text-sm font-bold text-blue-600">{lists.filter(l => l.status === 'pending').length}</span>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Search Bar */}
-            <div className="mb-6">
+            <div className="mb-4">
               <div className="relative">
-                <svg className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="absolute left-4 top-2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 <input
@@ -305,7 +310,7 @@ function Home({ user }) {
                   placeholder="Search lists..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 form-input bg-white"
+                  className="w-full pl-10 pr-4 py-2 form-input bg-white"
                 />
               </div>
             </div>
@@ -314,16 +319,16 @@ function Home({ user }) {
 
         {/* Loading State */}
         {loading && (
-          <div className="flex flex-col items-center justify-center py-20">
-            <div className="w-12 h-12 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin"></div>
-            <p className="text-gray-600 mt-4">Loading your lists...</p>
+          <div className="flex flex-col items-center justify-center py-10">
+            <div className="w-8 h-8 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin"></div>
+            <p className="text-gray-600 mt-2 text-sm">Loading your lists...</p>
           </div>
         )}
 
         {/* Error State */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-center gap-3">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <div className="mb-3 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-center gap-2 text-sm">
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
             </svg>
             {error}
@@ -335,8 +340,8 @@ function Home({ user }) {
           <div>
             {/* Create List Form */}
             {showForm && (
-              <div className="card p-6 mb-8">
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">Create New List</h2>
+              <div className="card p-4 mb-6">
+                <h2 className="text-lg font-bold text-gray-800 mb-4">Create New List</h2>
                 <form
                   onSubmit={(e) => {
                     e.preventDefault()
@@ -347,10 +352,10 @@ function Home({ user }) {
                       e.target.reset()
                     }
                   }}
-                  className="space-y-4"
+                  className="space-y-2"
                 >
                   <div>
-                    <label className="block mb-2 font-semibold text-gray-700">List Title</label>
+                    <label className="block mb-0.5 font-semibold text-gray-700 text-xs">List Title</label>
                     <input
                       type="text"
                       name="listTitle"
@@ -360,15 +365,15 @@ function Home({ user }) {
                     />
                   </div>
                   <div>
-                    <label className="block mb-2 font-semibold text-gray-700">Description</label>
+                    <label className="block mb-0.5 font-semibold text-gray-700 text-xs">Description</label>
                     <textarea
                       name="listDescription"
                       placeholder="Add a description (optional)..."
                       className="form-textarea"
-                      rows="3"
+                      rows="1"
                     />
                   </div>
-                  <div className="flex gap-3">
+                  <div className="flex gap-2">
                     <button type="submit" className="btn-primary">
                       Create List
                     </button>
@@ -386,20 +391,20 @@ function Home({ user }) {
 
             {/* Lists Grid */}
             {filteredLists.length === 0 ? (
-              <div className="text-center py-16">
-                <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              <div className="text-center py-8">
+                <svg className="w-4 h-4 text-gray-300 mx-auto mb-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
-                <p className="text-gray-500 text-lg mb-4">No lists yet</p>
+                <p className="text-gray-500 text-sm mb-2">No lists yet</p>
                 <button
                   onClick={() => setShowForm(true)}
-                  className="btn-primary"
+                  className="btn-primary text-xs"
                 >
                   Create your first list
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {filteredLists.map((list) => (
                   <div
                     key={list.id}
@@ -407,9 +412,9 @@ function Home({ user }) {
                       setActiveList(list.id)
                       fetchTasks(list.id)
                     }}
-                    className="card p-6 cursor-pointer hover:shadow-xl transition-all duration-300 group"
+                    className="card p-3 cursor-pointer hover:shadow-xl transition-all duration-300 group"
                   >
-                    <div className="flex items-start gap-4">
+                    <div className="flex items-start gap-2">
                       <input
                         type="checkbox"
                         checked={list.status === 'completed'}
@@ -417,19 +422,19 @@ function Home({ user }) {
                           e.stopPropagation()
                           toggleListStatus(list.id, list.status)
                         }}
-                        className="w-5 h-5 mt-1 cursor-pointer accent-orange-500"
+                        className="w-4 h-4 mt-1 cursor-pointer accent-orange-500"
                       />
                       <div className="flex-1">
-                        <h3 className={`text-xl font-bold mb-2 ${
+                        <h3 className={`text-sm font-bold mb-1 ${
                           list.status === 'completed' ? 'text-gray-400 line-through' : 'text-gray-800'
                         }`}>
                           {list.title}
                         </h3>
-                        <p className={`text-sm mb-4 ${list.status === 'completed' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <p className={`text-xs mb-2 ${list.status === 'completed' ? 'text-gray-400' : 'text-gray-600'}`}>
                           {list.description || 'No description'}
                         </p>
                         <div className="flex items-center justify-between">
-                          <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
+                          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                             list.status === 'completed'
                               ? 'badge badge-success'
                               : 'badge badge-pending'
@@ -445,22 +450,22 @@ function Home({ user }) {
             )}
 
             {/* Tasks Table Section */}
-            <div className="card p-8 mt-12">
-              <h3 className="text-2xl font-bold text-gray-800 mb-6">All Tasks</h3>
+            <div className="card p-4 mt-4">
+              <h3 className="text-lg font-bold text-gray-800 mb-3">All Tasks</h3>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b-2 border-orange-500">
-                      <th className="text-left py-3 px-4 font-bold text-gray-800">LIST ID</th>
-                      <th className="text-left py-3 px-4 font-bold text-gray-800">TITLE</th>
-                      <th className="text-left py-3 px-4 font-bold text-gray-800">STATUS</th>
-                      <th className="text-left py-3 px-4 font-bold text-gray-800">ACTION</th>
+                      <th className="text-left py-2 px-3 font-bold text-gray-800 text-xs">LIST ID</th>
+                      <th className="text-left py-2 px-3 font-bold text-gray-800 text-xs">TITLE</th>
+                      <th className="text-left py-2 px-3 font-bold text-gray-800 text-xs">STATUS</th>
+                      <th className="text-left py-2 px-3 font-bold text-gray-800 text-xs">ACTION</th>
                     </tr>
                   </thead>
                   <tbody>
                     {tasks.length === 0 ? (
                       <tr>
-                        <td colSpan="4" className="text-center py-8 text-gray-500">
+                        <td colSpan="4" className="text-center py-4 text-gray-500 text-xs">
                           No tasks yet. Create a list and add tasks to see them here.
                         </td>
                       </tr>
@@ -469,12 +474,12 @@ function Home({ user }) {
                         const list = lists.find(l => l.id === task.list_id)
                         return (
                           <tr key={task.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                            <td className="py-4 px-4 text-gray-700 font-semibold">{task.list_id}</td>
-                            <td className={`py-4 px-4 ${task.status === 'completed' ? 'line-through text-gray-400' : 'text-gray-800'}`}>
+                            <td className="py-2 px-3 text-gray-700 font-semibold text-xs">{task.list_id}</td>
+                            <td className={`py-2 px-3 text-xs ${task.status === 'completed' ? 'line-through text-gray-400' : 'text-gray-800'}`}>
                               {task.description}
                             </td>
-                            <td className="py-4 px-4">
-                              <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
+                            <td className="py-2 px-3">
+                              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                                 task.status === 'completed'
                                   ? 'bg-green-100 text-green-700'
                                   : 'bg-yellow-100 text-yellow-700'
@@ -482,17 +487,17 @@ function Home({ user }) {
                                 {task.status === 'completed' ? 'Completed' : 'Pending'}
                               </span>
                             </td>
-                            <td className="py-4 px-4">
-                              <div className="flex gap-2">
+                            <td className="py-2 px-3">
+                              <div className="flex gap-1">
                                 <button
                                   onClick={() => toggleTaskStatus(task.id, task.status)}
-                                  className="px-3 py-1 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition-colors"
+                                  className="px-2 py-0.5 bg-blue-500 text-white text-xs rounded-md hover:bg-blue-600 transition-colors"
                                 >
                                   {task.status === 'completed' ? 'Undo' : 'Complete'}
                                 </button>
                                 <button
                                   onClick={() => deleteTask(task.id)}
-                                  className="px-3 py-1 bg-red-500 text-white text-sm rounded-md hover:bg-red-600 transition-colors"
+                                  className="px-2 py-0.5 bg-red-500 text-white text-xs rounded-md hover:bg-red-600 transition-colors"
                                 >
                                   Delete
                                 </button>
@@ -515,43 +520,43 @@ function Home({ user }) {
             {/* Back Button */}
             <button
               onClick={() => setActiveList(null)}
-              className="mb-8 flex items-center gap-2 text-gray-600 hover:text-gray-800 font-semibold"
+              className="mb-3 flex items-center gap-2 text-gray-600 hover:text-gray-800 font-semibold text-sm"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
               Back to Lists
             </button>
 
             {/* List Header */}
-            <div className="card p-8 mb-8">
-              <div className="flex items-start justify-between mb-6">
-                <div className="flex items-start gap-4 flex-1">
+            <div className="card p-4 mb-3">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-start gap-2 flex-1">
                   <input
                     type="checkbox"
                     checked={activeLisObj.status === 'completed'}
                     onChange={() => toggleListStatus(activeList, activeLisObj.status)}
-                    className="w-6 h-6 mt-2 cursor-pointer accent-orange-500"
+                    className="w-4 h-4 mt-1 cursor-pointer accent-orange-500"
                   />
                   <div className="flex-1">
-                    <h2 className={`text-4xl font-bold mb-3 ${
+                    <h2 className={`text-2xl font-bold mb-1 ${
                       activeLisObj.status === 'completed' ? 'text-gray-400 line-through' : 'text-gray-800'
                     }`}>
                       {activeLisObj.title}
                     </h2>
-                    <p className={`text-lg ${
+                    <p className={`text-sm ${
                       activeLisObj.status === 'completed' ? 'text-gray-400' : 'text-gray-600'
                     }`}>
                       {activeLisObj.description}
                     </p>
                   </div>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex gap-2">
                   <button
                     onClick={() => setIsEditing(!isEditing)}
                     className="btn-secondary flex items-center gap-2"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                     {isEditing ? 'Cancel' : 'Edit'}
@@ -560,7 +565,7 @@ function Home({ user }) {
                     onClick={() => deleteList(activeList)}
                     className="btn-danger flex items-center gap-2"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
                     Delete
@@ -579,10 +584,10 @@ function Home({ user }) {
                       updateList(activeList, title, description)
                     }
                   }}
-                  className="bg-gray-50 p-6 rounded-lg space-y-4 mt-6"
+                  className="bg-gray-50 p-3 rounded-lg space-y-2 mt-3"
                 >
                   <div>
-                    <label className="block mb-2 font-semibold text-gray-700">Title</label>
+                    <label className="block mb-1 font-semibold text-gray-700 text-xs">Title</label>
                     <input
                       type="text"
                       name="editTitle"
@@ -591,15 +596,15 @@ function Home({ user }) {
                     />
                   </div>
                   <div>
-                    <label className="block mb-2 font-semibold text-gray-700">Description</label>
+                    <label className="block mb-1 font-semibold text-gray-700 text-xs">Description</label>
                     <textarea
                       name="editDescription"
                       defaultValue={activeLisObj.description}
                       className="form-textarea"
-                      rows="3"
+                      rows="2"
                     />
                   </div>
-                  <div className="flex gap-3">
+                  <div className="flex gap-2">
                     <button type="submit" className="btn-primary">Save Changes</button>
                     <button
                       type="button"
@@ -615,8 +620,8 @@ function Home({ user }) {
 
             {/* Tasks Section */}
             {!isEditing && (
-              <div className="card p-8">
-                <h3 className="text-2xl font-bold text-gray-800 mb-6">Tasks</h3>
+              <div className="card p-4">
+                <h3 className="text-lg font-bold text-gray-800 mb-3">Tasks</h3>
 
                 {/* Add Task Form */}
                 <form
@@ -628,7 +633,7 @@ function Home({ user }) {
                       e.target.reset()
                     }
                   }}
-                  className="flex gap-3 mb-8"
+                  className="flex gap-2 mb-3"
                 >
                   <input
                     type="text"
@@ -638,9 +643,9 @@ function Home({ user }) {
                   />
                   <button
                     type="submit"
-                    className="btn-primary flex items-center gap-2 whitespace-nowrap"
+                    className="btn-primary flex items-center gap-1 whitespace-nowrap"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
                     Add
@@ -648,27 +653,27 @@ function Home({ user }) {
                 </form>
 
                 {/* Tasks List */}
-                <div className="space-y-2">
+                <div className="space-y-1">
                   {tasks.filter(t => t.list_id === activeList).length === 0 ? (
-                    <div className="text-center py-12">
-                      <svg className="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <div className="text-center py-6">
+                      <svg className="w-4 h-4 text-gray-300 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      <p className="text-gray-500">No tasks yet. Add one to get started!</p>
+                      <p className="text-gray-500 text-sm">No tasks yet. Add one to get started!</p>
                     </div>
                   ) : (
                     tasks.filter(t => t.list_id === activeList).map((task) => (
                       <div
                         key={task.id}
-                        className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group"
+                        className="flex items-center gap-2 p-2.5 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group"
                       >
                         <input
                           type="checkbox"
                           checked={task.status === 'completed'}
                           onChange={() => toggleTaskStatus(task.id, task.status)}
-                          className="w-5 h-5 cursor-pointer accent-orange-500"
+                          className="w-4 h-4 cursor-pointer accent-orange-500"
                         />
-                        <span className={`flex-1 text-lg ${
+                        <span className={`flex-1 text-sm ${
                           task.status === 'completed'
                             ? 'line-through text-gray-400'
                             : 'text-gray-800'
@@ -677,7 +682,7 @@ function Home({ user }) {
                         </span>
                         <button
                           onClick={() => deleteTask(task.id)}
-                          className="px-3 py-1 bg-red-500 text-white text-sm rounded-md hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100"
+                          className="px-2 py-0.5 bg-red-500 text-white text-xs rounded-md hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100"
                         >
                           Delete
                         </button>

@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import axios from 'axios'
-import { Link } from 'react-router-dom'
+import api from './api'
+import { Link, useNavigate } from 'react-router-dom'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 function Register() {
+  const navigate = useNavigate()
   const [username, setUsername] = useState('')
   const [name, setName] = useState('')
   const [password, setPassword] = useState('')
@@ -48,20 +49,16 @@ function Register() {
 
     setLoading(true)
     try {
-      const response = await axios.post(
-        `${API_URL}/register`,
-        { username, name, password, confirm: confirmPassword },
-        { withCredentials: true }
-      )
+      const response = await api.post('/register', { username, name, password, confirm: confirmPassword })
 
-      if (response.data.success) {
+      if (response.data?.success) {
         setMessage('✓ Registration successful! Redirecting to login...')
         setMessageType('success')
         setTimeout(() => {
-          window.location.href = '/login'
-        }, 1500)
+          navigate('/login')
+        }, 1200)
       } else {
-        setMessage(response.data.message || 'Registration failed')
+        setMessage(response.data?.message || 'Registration failed')
         setMessageType('error')
       }
     } catch (error) {

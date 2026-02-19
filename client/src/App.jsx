@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
+import api from './api'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import Login from './login.jsx'
 import Register from './register.jsx'
 import Home from './home.jsx'
+import Dashboard from './pages/Dashboard.jsx'
 import ListItem from './list-item.jsx'
 import Header from './components/Header.jsx'
 
@@ -14,12 +16,9 @@ function App() {
     // Check if user is logged in
     const checkAuth = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/user', {
-          credentials: 'include'
-        })
-        if (response.ok) {
-          const data = await response.json()
-          setUser(data.user)
+        const response = await api.get('/user')
+        if (response?.data?.user) {
+          setUser(response.data.user)
         }
       } catch (err) {
         console.error('Auth check failed:', err)
@@ -47,6 +46,7 @@ function App() {
         {user && <Header user={user} setUser={setUser} />}
         <Routes>
           <Route path="/" element={user ? <Home user={user} /> : <Navigate to="/login" />} />
+          <Route path="/dashboard" element={user ? <Dashboard user={user} setUser={setUser} /> : <Navigate to="/login" />} />
           <Route path="/login" element={!user ? <Login setUser={setUser} /> : <Navigate to="/" />} />
           <Route path="/register" element={!user ? <Register /> : <Navigate to="/" />} />
           <Route path="/list/:id" element={user ? <ListItem user={user} /> : <Navigate to="/login" />} />
