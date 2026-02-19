@@ -267,5 +267,6 @@ function Dashboard({ user, setUser }) {
         </main>
       </div>
     </div>
-
+  )
+}
 export default Dashboard
