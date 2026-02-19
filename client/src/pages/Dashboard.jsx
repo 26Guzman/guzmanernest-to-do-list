@@ -119,7 +119,24 @@ function Dashboard({ user, setUser }) {
       </nav>
 
       {/* Main Content */}
-      <div className="container">
+      <div className="d-flex">
+        <aside className="app-sidebar d-none d-md-block me-4">
+          <div style={{marginBottom:24}}>
+            <h2 style={{color:'#fff', margin:0, fontWeight:700}}>TaskFlow</h2>
+          </div>
+          <nav style={{display:'flex', flexDirection:'column', gap:12}}>
+            <a href="#/dashboard" className="text-white text-decoration-none">📊 Dashboard</a>
+            <a href="#/" className="text-white text-decoration-none">📝 Lists</a>
+            <a href="#/list-item" className="text-white text-decoration-none">➕ New List</a>
+            <a href="#/profile" className="text-white text-decoration-none">⚙️ Settings</a>
+          </nav>
+          <div style={{marginTop:24}}>
+            <button onClick={handleLogout} className="btn btn-light">Logout</button>
+          </div>
+        </aside>
+
+        <main className="flex-grow-1">
+          <div className="container">
         {error && (
           <div className="alert alert-danger alert-dismissible fade show mb-4" role="alert">
             <i className="bi bi-exclamation-circle-fill me-2"></i>
@@ -218,7 +235,8 @@ function Dashboard({ user, setUser }) {
               })}
             </div>
           )}
-        </div>
+          </div>
+        </main>
       </div>
     </div>
   )
