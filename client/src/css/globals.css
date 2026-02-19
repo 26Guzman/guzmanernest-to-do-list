@@ -263,3 +263,12 @@ img {
   max-width: min(150px, 100%) !important;
   height: auto !important;
 }
+
+/* Mobile sidebar overlay */
+.app-sidebar-mobile { position: fixed; left:0; top:0; bottom:0; width:260px; transform: translateX(-100%); transition: transform .25s ease; background: var(--header-bg); padding:1rem; z-index:1050; }
+.app-sidebar-mobile.open { transform: translateX(0); }
+.sidebar-backdrop { position:fixed; inset:0; background: rgba(0,0,0,0.45); z-index:1040; }
+
+@media (max-width: 767.98px) {
+  .app-sidebar.d-none.d-md-block { display: none !important }
+}

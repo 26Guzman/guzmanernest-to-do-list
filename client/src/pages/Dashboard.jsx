@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom"
 
 function Dashboard({ user, setUser }) {
   const navigate = useNavigate()
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
   const [tasks, setTasks] = useState([])
   const [stats, setStats] = useState({
     totalLists: 0,
@@ -98,9 +99,14 @@ function Dashboard({ user, setUser }) {
       {/* Header */}
       <nav className="navbar navbar-expand-lg header-dark shadow-sm mb-4">
         <div className="container-fluid">
-          <a className="navbar-brand fw-bold" href="#/">
-            <i className="bi bi-graph-up"></i> Dashboard
-          </a>
+          <div className="d-flex align-items-center">
+            <button className="btn btn-link text-white d-md-none me-2" onClick={() => setMobileSidebarOpen(true)} aria-label="Open sidebar">
+              <i className="bi bi-list" style={{fontSize:20}}></i>
+            </button>
+            <a className="navbar-brand fw-bold" href="#/">
+              <i className="bi bi-graph-up"></i> Dashboard
+            </a>
+          </div>
           <div className="d-flex align-items-center">
             <div className="dropdown">
               <button className="btn btn-link dropdown-toggle text-dark text-decoration-none" type="button" data-bs-toggle="dropdown">
@@ -134,6 +140,27 @@ function Dashboard({ user, setUser }) {
             <button onClick={handleLogout} className="btn btn-light">Logout</button>
           </div>
         </aside>
+
+        {/* Mobile sidebar overlay */}
+        {mobileSidebarOpen && (
+          <div>
+            <div className="sidebar-backdrop" onClick={() => setMobileSidebarOpen(false)}></div>
+            <div className={`app-sidebar-mobile open`}>
+              <div style={{marginBottom:24}}>
+                <h2 style={{color:'#fff', margin:0, fontWeight:700}}>TaskFlow</h2>
+              </div>
+              <nav style={{display:'flex', flexDirection:'column', gap:12}}>
+                <a href="#/dashboard" className="text-white text-decoration-none" onClick={() => setMobileSidebarOpen(false)}>📊 Dashboard</a>
+                <a href="#/" className="text-white text-decoration-none" onClick={() => setMobileSidebarOpen(false)}>📝 Lists</a>
+                <a href="#/list-item" className="text-white text-decoration-none" onClick={() => setMobileSidebarOpen(false)}>➕ New List</a>
+                <a href="#/profile" className="text-white text-decoration-none" onClick={() => setMobileSidebarOpen(false)}>⚙️ Settings</a>
+              </nav>
+              <div style={{marginTop:24}}>
+                <button onClick={() => { setMobileSidebarOpen(false); handleLogout() }} className="btn btn-light">Logout</button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <main className="flex-grow-1">
           <div className="container">
