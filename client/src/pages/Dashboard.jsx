@@ -96,7 +96,7 @@ function Dashboard({ user, setUser }) {
   return (
     <div className="bg-light min-vh-100 py-4">
       {/* Header */}
-      <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
+      <nav className="navbar navbar-expand-lg header-dark shadow-sm mb-4">
         <div className="container-fluid">
           <a className="navbar-brand fw-bold" href="#/">
             <i className="bi bi-graph-up"></i> Dashboard
@@ -136,107 +136,88 @@ function Dashboard({ user, setUser }) {
           </div>
         )}
 
-        {/* Stats Cards */}
+        {/* Summary Cards */}
         <div className="row mb-4">
-          <div className="col-md-3">
-            <div className="card shadow-sm border-0 text-center">
+          <div className="col-6 col-md-3">
+            <div className="card p-3 text-center">
               <div className="card-body">
                 <h6 className="text-muted">Total Lists</h6>
-                <h3 className="fw-bold text-info">{stats.totalLists}</h3>
+                <h3 className="fw-bold" style={{ color: 'var(--primary)' }}>{stats.totalLists}</h3>
               </div>
             </div>
           </div>
 
-          <div className="col-md-3">
-            <div className="card shadow-sm border-0 text-center">
+          <div className="col-6 col-md-3">
+            <div className="card p-3 text-center">
               <div className="card-body">
                 <h6 className="text-muted">Total Tasks</h6>
-                <h3 className="fw-bold text-primary">{stats.totalTasks}</h3>
+                <h3 className="fw-bold" style={{ color: 'var(--primary)' }}>{stats.totalTasks}</h3>
               </div>
             </div>
           </div>
 
-          <div className="col-md-3">
-            <div className="card shadow-sm border-0 text-center">
+          <div className="col-6 col-md-3 mt-3 mt-md-0">
+            <div className="card p-3 text-center">
               <div className="card-body">
                 <h6 className="text-muted">Pending</h6>
-                <h3 className="fw-bold text-warning">{stats.pending}</h3>
+                <h3 className="fw-bold" style={{ color: 'var(--priority-medium)' }}>{stats.pending}</h3>
               </div>
             </div>
           </div>
 
-          <div className="col-md-3">
-            <div className="card shadow-sm border-0 text-center">
+          <div className="col-6 col-md-3 mt-3 mt-md-0">
+            <div className="card p-3 text-center">
               <div className="card-body">
                 <h6 className="text-muted">Completed</h6>
-                <h3 className="fw-bold text-success">{stats.completed}</h3>
+                <h3 className="fw-bold" style={{ color: 'var(--priority-low)' }}>{stats.completed}</h3>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Tasks Table */}
-        <div className="card shadow-sm border-0">
-          <div className="card-header bg-white">
-            <h5 className="mb-0">Your Task Lists</h5>
-          </div>
-          <div className="card-body">
-            {tasks.length === 0 ? (
-              <div className="text-center py-5">
-                <p className="text-muted">No tasks yet</p>
-              </div>
-            ) : (
-              <div className="table-responsive">
-                <table className="table table-hover align-middle">
-                  <thead className="table-light">
-                    <tr>
-                      <th>#</th>
-                      <th>Task Name</th>
-                      <th>Category</th>
-                      <th>Due Date</th>
-                      <th>Status</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {tasks.map((task, index) => (
-                      <tr key={task.id || index}>
-                        <td>{index + 1}</td>
-                        <td>{task.title}</td>
-                        <td>{task.category || 'General'}</td>
-                        <td>{task.dueDate || 'N/A'}</td>
-                        <td>
-                          <span className={`badge ${
-                            task.status === 'pending' 
-                              ? 'bg-warning text-dark'
-                              : task.status === 'in progress'
-                              ? 'bg-primary'
-                              : 'bg-success'
-                          }`}>
-                            {task.status ? task.status.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : 'Pending'}
-                          </span>
-                        </td>
-                        <td>
-                          <button
-                            onClick={() => handleEdit(task)}
-                            className="btn btn-sm btn-primary me-2"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDelete(task.id)}
-                            className="btn btn-sm btn-danger"
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
+        {/* Kanban Board */}
+        <div className="mb-4">
+          {tasks.length === 0 ? (
+            <div className="text-center py-5">
+              <p className="text-muted">No tasks yet</p>
+            </div>
+          ) : (
+            <div className="kanban">
+              {[
+                { key: 'pending', title: 'To Do' },
+                { key: 'in progress', title: 'In Progress' },
+                { key: 'completed', title: 'Completed' }
+              ].map(col => {
+                const colTasks = tasks.filter(t => (t.status || 'pending').toLowerCase() === col.key)
+                return (
+                  <div className="kanban-column" key={col.key}>
+                    <div className="kanban-column-header">
+                      <h6>{col.title}</h6>
+                      <small className="text-muted">{colTasks.length}</small>
+                    </div>
+                    {colTasks.map((task, idx) => (
+                      <div className="task-card" key={task.id || idx}>
+                        <div className="task-title">{task.title}</div>
+                        <div className="task-meta">
+                          <div className="me-2">{task.category || 'General'}</div>
+                          <div className="text-muted">{task.dueDate || 'No due'}</div>
+                        </div>
+                        <div className="d-flex justify-content-between align-items-center mt-2">
+                          <div>
+                            <span className={`status-dot ${col.key === 'pending' ? 'priority-medium' : col.key === 'in progress' ? 'priority-medium' : 'priority-low'}`}></span>
+                          </div>
+                          <div>
+                            <button onClick={() => handleEdit(task)} className="btn btn-sm btn-primary me-2">Edit</button>
+                            <button onClick={() => handleDelete(task.id)} className="btn btn-sm btn-danger">Delete</button>
+                          </div>
+                        </div>
+                      </div>
                     ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>

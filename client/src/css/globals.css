@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @import url('https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css');
 @import url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css');
 
@@ -13,6 +14,8 @@
   --priority-low: #22C55E;
   --shadow: 0 12px 30px rgba(16,24,40,0.06);
   --radius: 12px;
+  --header-bg: #0F172A; /* dark navy for header/sidebar */
+  --header-text: #FFFFFF;
 }
 
 * {
@@ -23,13 +26,25 @@
 
 html,
 body {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Inter', 'Poppins', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: var(--bg);
   min-height: 100vh;
   color: var(--text-dark);
 }
+
+/* Layout spacing tweaks */
+.container { padding-left: 1.25rem; padding-right: 1.25rem }
+.navbar { padding: 0.6rem 1rem }
+
+/* Dark header / sidebar variant */
+.header-dark { background: var(--header-bg) !important; color: var(--header-text) !important; }
+.header-dark .navbar-brand { color: var(--header-text) !important; }
+.header-dark .btn-link { color: rgba(255,255,255,0.9) !important }
+
+/* Sidebar helper (if you add a sidebar component) */
+.app-sidebar { width: 260px; background: var(--header-bg); color: var(--header-text); min-height:100vh; padding:1rem }
 
 #root {
   display: flex;
@@ -93,12 +108,13 @@ textarea {
 }
 
 /* Card styling */
-.card {
+.card { 
   background: var(--card);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   transition: all 0.25s ease;
   border: 1px solid rgba(16,24,40,0.04);
+  padding: 0.75rem;
 }
 
 .card:hover {
@@ -115,7 +131,7 @@ textarea {
 h1, h2, h3, h4 { color: var(--text-dark) }
 
 /* Make card headings and key numbers pop */
-.card .card-body h3 { color: var(--primary); }
+.card .card-body h3 { color: var(--primary); font-size: 1.4rem }
 
 /* Button variants */
 .btn-primary {
@@ -184,8 +200,9 @@ h1, h2, h3, h4 { color: var(--text-dark) }
 /* Kanban styles */
 .kanban {
   display: flex;
-  gap: 1rem;
+  gap: 1.25rem;
   align-items: flex-start;
+  padding-bottom: 0.5rem;
 }
 
 .kanban-column {
@@ -196,6 +213,7 @@ h1, h2, h3, h4 { color: var(--text-dark) }
   padding: 1rem;
   box-shadow: var(--shadow);
   border: 1px solid rgba(16,24,40,0.03);
+  max-height: 72vh; overflow:auto;
 }
 
 .kanban-column-header {
