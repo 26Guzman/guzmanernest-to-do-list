@@ -262,7 +262,6 @@ function Dashboard({ user, setUser }) {
               })}
             </div>
           )}
-          </div>
         </main>
       </div>
     </div>
