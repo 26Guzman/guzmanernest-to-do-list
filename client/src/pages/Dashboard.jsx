@@ -262,9 +262,10 @@ function Dashboard({ user, setUser }) {
               })}
             </div>
           )}
+          </div>
+        </div>
         </main>
       </div>
     </div>
-  )
-}
+
 export default Dashboard
